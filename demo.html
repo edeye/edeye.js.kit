@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>spy</title>
+<script src="EdeyeUtil.js"></script>
+<script>
+	window.onload = function() {
+		var df = 123.01;
+		//var ret = Edeye.checkKit.decimalRange(df, '&&', [ '>', 122.99 ], [ '<',
+		//		123.01 ]);
+		//console.log(ret);
+		var ret = Edeye.checkKit.isStringNumber('123.0 1');
+		console.log(ret);
+	}
+</script>
+</head>
+<body>
+	<form style="display: none" id="dw" method="post"></form>
+</body>
+</html>
