@@ -22,11 +22,85 @@
 			this[name] = param;
 		}
 	};
+	
+	{
+		var funcName = 'demo';
+		var funcDes = 'this is a demo';
+		var func = {};
+		
+
+		_Edeye.load(funcName, funcDes, func);
+	}
 
 	{
 		var funcName = 'checkKit';
 		var funcDes = 'this is a check kit';
 		var func = {};
+		
+		// 综合验证
+		func.finalCheck = function(obj,allCheckRetFlag,condition){
+			
+			var demo = `
+				var ret = Edeye.checkKit.finalCheck(objParam,true,{
+					'name': {
+						method:'strRange',
+						methodParam:['&&', [ '>=', 2 ], [ '<=', 16 ]],
+						msg:'名称在2~16个字之间'
+					},
+					'gender': {
+						method:'strRange',
+						methodParam:['&&', [ '>=', 1 ], [ '<=', 1 ]],
+						msg:'请选择性别'
+					},
+					'age': {
+						method:'integerRange',
+						methodParam:['&&', [ '>=', 18 ], [ '<=', 75 ]],
+						msg:'年龄必须在18~75之间'
+					}
+				});
+			`
+			var ret = {
+				flag : true,
+				msg : []
+			}
+			
+			for(var tmpKey in condition){
+				condition[tmpKey].methodParam.unshift(obj[tmpKey]);
+				var applyRet = this[condition[tmpKey].method].apply(this,condition[tmpKey].methodParam);
+				if(!applyRet){
+					if(!allCheckRetFlag){
+						ret.flag = false;
+						ret.msg = [condition[tmpKey].msg]
+						break;
+					}else{
+						ret.flag = false;
+						ret.msg.push(condition[tmpKey].msg);
+					}
+				}
+			}
+			
+			return ret;
+		}
+		
+		//字符范围
+		func.strRange = function(str,type,condition1,condition2){
+			if(this.isNullOrUndefinedOrNaNOrInfinity(str)){
+				return false;
+			}
+			var str = String(str);
+			if('&&' !== type && '||' != type || !(condition1 instanceof Array) || !(condition2 instanceof Array) || condition1.length !== 2 || condition2.length !== 2){
+				return false;
+			}
+			if(condition1[0] !== '<=' && condition1[0] !== '>=' && condition1[0] !== '>' && condition1[0] !== '<' && condition2[0] !== '<=' && condition2[0] !== '>=' && condition2[0] !== '>' && condition2[0] !== '<'){
+				return false;
+			}
+			if(!this.isNumber(condition1[1]) || !this.isNumber(condition2[1])){
+				return false;
+			}
+			var condition1Flag = eval("str.length " + condition1[0] + " condition1[1]");
+			var condition2Flag = eval("str.length " + condition2[0] + " condition2[1]");
+			return eval("condition1Flag " + type + " condition2Flag");
+		}
 
 		// 整数范围
 		// integerRange(123, '&&', [ '>', 122.99 ], [ '<=',123.01 ]);
@@ -34,63 +108,18 @@
 			if(!this.isInteger(number)){
 				return false;
 			}
-			if('&&' !== type && '||' != type){
+			if('&&' !== type && '||' != type || !(condition1 instanceof Array) || !(condition2 instanceof Array) || condition1.length !== 2 || condition2.length !== 2){
 				return false;
 			}
-			if(!(condition1 instanceof Array)){
+			if(condition1[0] !== '<=' && condition1[0] !== '>=' && condition1[0] !== '>' && condition1[0] !== '<' && condition2[0] !== '<=' && condition2[0] !== '>=' && condition2[0] !== '>' && condition2[0] !== '<'){
 				return false;
 			}
-			if(!(condition2 instanceof Array)){
+			if(!this.isNumber(condition1[1]) || !this.isNumber(condition2[1])){
 				return false;
 			}
-			if(condition1.length !== 2){
-				return false;
-			}
-			if(condition2.length !== 2){
-				return false;
-			}
-			if(condition1[0] !== '<=' && condition1[0] !== '>=' && condition1[0] !== '>' && condition1[0] !== '>'){
-				return false;
-			}
-			if(condition2[0] !== '<=' && condition2[0] !== '>=' && condition2[0] !== '>' && condition2[0] !== '>'){
-				return false;
-			}
-			if(!this.isNumber(condition1[1])){
-				return false;
-			}
-			if(!this.isNumber(condition2[1])){
-				return false;
-			}
-			
-			var condition1Flag = false;
-			if(condition1[0] === '<='){
-				condition1Flag = (number <= condition1[1]);
-			}else if(condition1[0] === '>='){
-				condition1Flag = (number >= condition1[1]);
-			}else if(condition1[0] === '<'){
-				condition1Flag = (number < condition1[1]);
-			}else if(condition1[0] === '>'){
-				condition1Flag = (number > condition1[1]);
-			}
-
-			var condition2Flag = false;
-			if(condition2[0] === '<='){
-				condition2Flag = (number <= condition2[1]);
-			}else if(condition1[0] === '>='){
-				condition2Flag = (number >= condition2[1]);
-			}else if(condition1[0] === '<'){
-				condition2Flag = (number < condition2[1]);
-			}else if(condition1[0] === '>'){
-				condition2Flag = (number > condition2[1]);
-			}
-			
-			if('&&' === type){
-				return condition1Flag && condition2Flag;
-			}else if('||' === type){
-				return condition1Flag || condition2Flag;
-			}
-			
-			return false;
+			var condition1Flag = eval("number " + condition1[0] + " condition1[1]");
+			var condition2Flag = eval("number " + condition2[0] + " condition2[1]");
+			return eval("condition1Flag " + type + " condition2Flag");
 		}
 
 		// 小数范围
@@ -99,63 +128,18 @@
 			if(!this.isDecimal(number)){
 				return false;
 			}
-			if('&&' !== type && '||' != type){
+			if('&&' !== type && '||' != type || !(condition1 instanceof Array) || !(condition2 instanceof Array) || condition1.length !== 2 || condition2.length !== 2){
 				return false;
 			}
-			if(!(condition1 instanceof Array)){
+			if(condition1[0] !== '<=' && condition1[0] !== '>=' && condition1[0] !== '>' && condition1[0] !== '<' && condition2[0] !== '<=' && condition2[0] !== '>=' && condition2[0] !== '>' && condition2[0] !== '<'){
 				return false;
 			}
-			if(!(condition2 instanceof Array)){
+			if(!this.isNumber(condition1[1]) || !this.isNumber(condition2[1])){
 				return false;
 			}
-			if(condition1.length !== 2){
-				return false;
-			}
-			if(condition2.length !== 2){
-				return false;
-			}
-			if(condition1[0] !== '<=' && condition1[0] !== '>=' && condition1[0] !== '>' && condition1[0] !== '>'){
-				return false;
-			}
-			if(condition2[0] !== '<=' && condition2[0] !== '>=' && condition2[0] !== '>' && condition2[0] !== '>'){
-				return false;
-			}
-			if(!this.isNumber(condition1[1])){
-				return false;
-			}
-			if(!this.isNumber(condition2[1])){
-				return false;
-			}
-			
-			var condition1Flag = false;
-			if(condition1[0] === '<='){
-				condition1Flag = (number <= condition1[1]);
-			}else if(condition1[0] === '>='){
-				condition1Flag = (number >= condition1[1]);
-			}else if(condition1[0] === '<'){
-				condition1Flag = (number < condition1[1]);
-			}else if(condition1[0] === '>'){
-				condition1Flag = (number > condition1[1]);
-			}
-
-			var condition2Flag = false;
-			if(condition2[0] === '<='){
-				condition2Flag = (number <= condition2[1]);
-			}else if(condition1[0] === '>='){
-				condition2Flag = (number >= condition2[1]);
-			}else if(condition1[0] === '<'){
-				condition2Flag = (number < condition2[1]);
-			}else if(condition1[0] === '>'){
-				condition2Flag = (number > condition2[1]);
-			}
-			
-			if('&&' === type){
-				return condition1Flag && condition2Flag;
-			}else if('||' === type){
-				return condition1Flag || condition2Flag;
-			}
-			
-			return false;
+			var condition1Flag = eval("number " + condition1[0] + " condition1[1]");
+			var condition2Flag = eval("number " + condition2[0] + " condition2[1]");
+			return eval("condition1Flag " + type + " condition2Flag");
 		}
 
 		// 数字范围
@@ -164,63 +148,18 @@
 			if(this.isNullOrUndefinedOrNaNOrInfinity(number)){
 				return false;
 			}
-			if('&&' !== type && '||' != type){
+			if('&&' !== type && '||' != type || !(condition1 instanceof Array) || !(condition2 instanceof Array) || condition1.length !== 2 || condition2.length !== 2){
 				return false;
 			}
-			if(!(condition1 instanceof Array)){
+			if(condition1[0] !== '<=' && condition1[0] !== '>=' && condition1[0] !== '>' && condition1[0] !== '<' && condition2[0] !== '<=' && condition2[0] !== '>=' && condition2[0] !== '>' && condition2[0] !== '<'){
 				return false;
 			}
-			if(!(condition2 instanceof Array)){
+			if(!this.isNumber(condition1[1]) || !this.isNumber(condition2[1])){
 				return false;
 			}
-			if(condition1.length !== 2){
-				return false;
-			}
-			if(condition2.length !== 2){
-				return false;
-			}
-			if(condition1[0] !== '<=' && condition1[0] !== '>=' && condition1[0] !== '>' && condition1[0] !== '>'){
-				return false;
-			}
-			if(condition2[0] !== '<=' && condition2[0] !== '>=' && condition2[0] !== '>' && condition2[0] !== '>'){
-				return false;
-			}
-			if(!this.isNumber(condition1[1])){
-				return false;
-			}
-			if(!this.isNumber(condition2[1])){
-				return false;
-			}
-			
-			var condition1Flag = false;
-			if(condition1[0] === '<='){
-				condition1Flag = (number <= condition1[1]);
-			}else if(condition1[0] === '>='){
-				condition1Flag = (number >= condition1[1]);
-			}else if(condition1[0] === '<'){
-				condition1Flag = (number < condition1[1]);
-			}else if(condition1[0] === '>'){
-				condition1Flag = (number > condition1[1]);
-			}
-
-			var condition2Flag = false;
-			if(condition2[0] === '<='){
-				condition2Flag = (number <= condition2[1]);
-			}else if(condition1[0] === '>='){
-				condition2Flag = (number >= condition2[1]);
-			}else if(condition1[0] === '<'){
-				condition2Flag = (number < condition2[1]);
-			}else if(condition1[0] === '>'){
-				condition2Flag = (number > condition2[1]);
-			}
-			
-			if('&&' === type){
-				return condition1Flag && condition2Flag;
-			}else if('||' === type){
-				return condition1Flag || condition2Flag;
-			}
-			
-			return false;
+			var condition1Flag = eval("number " + condition1[0] + " condition1[1]");
+			var condition2Flag = eval("number " + condition2[0] + " condition2[1]");
+			return eval("condition1Flag " + type + " condition2Flag");
 		}
 
 		// 判断是否为整数
@@ -229,6 +168,18 @@
 				return false;
 			}
 			return String(number).indexOf(".") === -1;
+		}
+		
+		// 判断是否为字符小数
+		func.isStringDecimal = function(number) {
+			if(!this.isStringNumber(number)){
+				return false;
+			}
+			var stringVal = String(number).split('.');
+			if(parseInt(stringVal[stringVal.length - 1], 10) === 0){
+				return false;
+			}
+			return String(number).indexOf(".") > -1;
 		}
 		
 		// 判断是否为小数
@@ -262,7 +213,7 @@
 		// 判断参数是否为Null,Undefined,NaN,Infinity
 		func.isNullOrUndefinedOrNaNOrInfinity = function(param){
 			if (!param) {
-				if (param !== '') {
+				if (param !== '' && param !== '0' && param !== 0) {
 					return true;
 				}
 			} else if (param === Infinity) {
