@@ -160,6 +160,7 @@
 
     // 判断是否为字符整数
     func.isStringInteger = function (number) {
+		  debugger;
       if (!this.isStringNumber(number)) {
         return false;
       }
@@ -195,7 +196,10 @@
       if (this.isNullOrUndefinedOrNaNOrInfinity(number)) {
         return false;
       }
-      var typeofValue = typeof(number)
+	  if(number === '0'){
+		  return true;
+	  }
+      var typeofValue = typeof(number);
       if ('string' === typeofValue) {
         if (/^[0-9]+.?[0-9]*$/.test(number)) {
           if (number.indexOf('0') === 0 && number.indexOf('0.') === -1) {
